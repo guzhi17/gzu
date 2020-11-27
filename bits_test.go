@@ -9,13 +9,13 @@ package gzu
 import "testing"
 
 func TestHi(t *testing.T)  {
-	t.Log(HighestBitInt64(0))
-	t.Log(HighestBitInt64(1))
-	t.Log(HighestBitInt64(8))
-	t.Log(HighestBitInt64(14))
-	t.Log(HighestBitInt64(15))
-	t.Log(HighestBitInt64(16))
-	t.Log(HighestBitInt64(17))
+	t.Log(BitHighestInt64(0))
+	t.Log(BitHighestInt64(1))
+	t.Log(BitHighestInt64(8))
+	t.Log(BitHighestInt64(14))
+	t.Log(BitHighestInt64(15))
+	t.Log(BitHighestInt64(16))
+	t.Log(BitHighestInt64(17))
 }
 
 func TestNormalTo2N(t *testing.T) {

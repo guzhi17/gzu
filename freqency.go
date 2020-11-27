@@ -12,7 +12,7 @@ import (
 
 type Frequency struct {
 	dt int64 //in ms
-	next Int64 //last time in ms
+	next AtomInt64 //last time in ms
 }
 
 func NewFrequency(dt time.Duration) *Frequency {
