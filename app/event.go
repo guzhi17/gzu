@@ -1,101 +1,11 @@
-package gzu
-
+package app
 
 import (
 	"log"
-	"os"
-	"os/signal"
 	"sync"
-	"sync/atomic"
-	"syscall"
 	"time"
 )
 
-var (
-	GlobalChExit = make(chan struct{})
-
-	closeChOnce int32 = 0
-
-	once sync.Once
-)
-
-
-func AppClose(){
-	if atomic.AddInt32(&closeChOnce, 1) == 1{
-		close(GlobalChExit)
-	}
-}
-
-func AppIsClosed() bool{
-	return atomic.LoadInt32(&closeChOnce)>0
-}
-
-func appDoInit(){
-
-	sigs := make(chan os.Signal,1)
-	//syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
-	//done := make(chan bool,1)
-	// This goroutine executes a blocking receive for
-	// signals. When it gets one it'll print it out
-	// and then notify the program that it can finish.
-	go func() {
-		sig := <-sigs
-		AppEvent(E_EXIT, nil, time.Second)
-		AppClose()
-		log.Println(sig)
-		//done <- true
-		time.Sleep(time.Second*8)
-		os.Exit(2)
-	}()
-}
-
-
-type AppRunnable interface {
-	AppRun()
-}
-
-type AppSync func()
-
-func AppInit()  {
-	AppEvent(E_INIT, nil, -1)
-	log.Println("App Initialized!!!")
-}
-
-func AppRun(runners...interface{})  {
-
-	once.Do(func() {
-		AppInit()
-		appDoInit()
-	})
-
-	//we are going to modify the
-	for _, runner := range runners{
-		switch r := runner.(type) {
-		case AppRunnable:
-			go r.AppRun()
-		case AppSync:
-			r()
-		case func():
-			go r()
-		default:
-			log.Println("not a runnable type", r)
-		}
-	}
-	//<- GlobalChExit:
-	for {
-		select {
-		case <- GlobalChExit:
-			goto EXIT
-		}
-	}
-EXIT:
-	AppClose()
-}
-
-
-
-//--------------------------------------------------------------------------
 
 const(
 	E_NONE = iota
@@ -174,20 +84,20 @@ func (h *EventsHandlers)Clone(e interface{})(r []IAppEventHandler){
 }
 
 //panic if name the same
-func AppEventRegister(e interface{}, v...IAppEventHandler){
+func Register(e interface{}, v...IAppEventHandler){
 	internalEventsHandlers.Register(e, v...)
 }
-func AppEventRegisterPrepend(e interface{}, v...IAppEventHandler){
+func RegisterPrepend(e interface{}, v...IAppEventHandler){
 	internalEventsHandlers.RegisterPrepend(e, v...)
 }
 
 //remove first
-func AppEventUnRegister(e interface{}, v IAppEventHandler)bool{
+func UnRegister(e interface{}, v IAppEventHandler)bool{
 	return internalEventsHandlers.UnRegister(e, v)
 }
 
 
-func AppEvent(e, d interface{}, timeout time.Duration) {
+func Event(e, d interface{}, timeout time.Duration) {
 	handlers := internalEventsHandlers.Clone(e)
 	if len(handlers) < 1{
 		//log.Println("no handler for ", e)
@@ -197,17 +107,17 @@ func AppEvent(e, d interface{}, timeout time.Duration) {
 	for _, v := range handlers{
 		if timeout == 0{
 			//no wait
-			go appEventHandle(v, e, d)
+			go handle(v, e, d)
 		}else if timeout < 0{
 			//wait forever
-			appEventHandle(v, e, d)
+			handle(v, e, d)
 		}else{
 			c := make(chan bool)
 			go func() {
 				defer func() {
 					close(c)
 				}()
-				appEventHandle(v, e, d)
+				handle(v, e, d)
 			}()
 			select {
 			case <-time.After(timeout):
@@ -219,7 +129,7 @@ func AppEvent(e, d interface{}, timeout time.Duration) {
 	}
 }
 
-func appEventHandle(h IAppEventHandler, e, d interface{})  {
+func handle(h IAppEventHandler, e, d interface{})  {
 	defer func() {
 		recover()
 	}()
@@ -245,17 +155,16 @@ func (h HandlerFunc1)Handle(e, d interface{})  {
 }
 
 
-func AppOnExit(exit func())  {
+func OnExit(exit func())  {
 	//filo
-	AppEventRegisterPrepend(E_EXIT, &HandlerFunc0{f:exit})
+	RegisterPrepend(E_EXIT, &HandlerFunc0{f:exit})
 }
 
-func AppOnInit(c func())  {
+func OnInit(c func())  {
 	//fifo
-	AppEventRegister(E_INIT, &HandlerFunc0{f:c})
+	Register(E_INIT, &HandlerFunc0{f:c})
 }
 
-func AppOnConfigChanged(f func(interface{}))  {
-	AppEventRegister(E_CONFIG_CHANGED, &HandlerFunc1{f:f})
+func OnConfigChanged(f func(interface{}))  {
+	Register(E_CONFIG_CHANGED, &HandlerFunc1{f:f})
 }
-//------------------------------------------------------------

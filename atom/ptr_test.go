@@ -1,4 +1,4 @@
-package gzu
+package atom
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func Get()(r I)  {
 }
 
 func TestAny(t *testing.T)  {
-	a := AtomAny{}
+	a := Any{}
 
 	s, ok := a.Get().([]byte)
 	fmt.Println(s, ok)
@@ -46,7 +46,7 @@ func TestAny(t *testing.T)  {
 }
 
 func TestAny_CAS(t *testing.T) {
-	a := AtomAny{}
+	a := Any{}
 	a.Set(&S{v:0})
 
 	b:=a
@@ -62,7 +62,7 @@ func TestAny_CAS(t *testing.T) {
 }
 
 func TestCas(t *testing.T)  {
-	var idx AtomInt32
+	var idx Int32
 
 	log.Println(idx.Swap(1))
 	log.Println(idx.Swap(1))
