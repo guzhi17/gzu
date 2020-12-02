@@ -7,12 +7,13 @@
 package gzu
 
 import (
+	"github.com/guzhi17/gzu/atom"
 	"time"
 )
 
 type Frequency struct {
 	dt int64 //in ms
-	next AtomInt64 //last time in ms
+	next atom.Int64 //last time in ms
 }
 
 func NewFrequency(dt time.Duration) *Frequency {
