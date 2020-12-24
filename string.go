@@ -221,6 +221,17 @@ func StringSplitBy(s string, sub string) (a, b string) {
 	return s[:n], s[n+len(sub):]
 }
 
+func StringTailAny(s string, chars string) (n int, b string) {
+	jl := len(chars)
+	for i:=len(s)-1; i >= 0; i--{
+		for j:=0;j<jl;j++{
+			if s[i] == chars[j]{
+				return i, s[i+1:]
+			}
+		}
+	}
+	return -1, s
+}
 
 func GetRune(s string, n int, as...string) string {
 	if n < 0{

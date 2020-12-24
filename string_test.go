@@ -54,3 +54,7 @@ func TestStringContentNormal(t *testing.T) {
 	log.Println(StringContentNormal(`hhhhhhhhhhhh`, 0, 2))
 	log.Println(StringContentNormal(`hhhhhhhhhhhht`, 0, 2))
 }
+
+func TestStringTailAny(t *testing.T) {
+	log.Println(StringTailAny("hello_this.big_test_", "._"))
+}
