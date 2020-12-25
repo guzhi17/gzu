@@ -11,6 +11,10 @@ func TestUrl(t *testing.T)  {
 		u *URL
 		err error
 	)
+	u = UrlParse(`1:`)
+	t.Log(u, err, u.FullPath())
+	u = UrlParse(`10.10.1.2:9090`)
+	t.Log(u, err, u.FullPath())
 
 	u = UrlParse(`./application.yml`)
 	t.Log(u, err, u.FullPath())

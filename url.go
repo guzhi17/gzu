@@ -24,11 +24,38 @@ const(
 )
 
 // [scheme:][//[userinfo@]host][/]path[?query][#fragment]
+type Host struct {
+	Addr string
+	Port int
+}
+
+func HostFromString(s string) (h Host) {
+	for i := len(s) -1; i >= 0; i--{
+		if s[i] == ':'{
+			ps := s[i+1:]
+			if len(ps) < 1{
+				h.Addr = s
+				return
+			}
+			v, err := strconv.Atoi(s[i+1:])
+			if err != nil{
+				h.Addr = s
+				return
+			}
+			h.Addr = s[:i]
+			h.Port = v
+			return
+		}
+	}
+	h.Addr = s
+	return
+}
+
 type URL struct {
 	Scheme     string // in lower case?
 	//Opaque     string    // encoded opaque data
 	User       *UserInfo // username and password information
-	Host       string    // host or host:port
+	Host       Host    // host or host:port
 	Path       string    // path (relative paths may omit leading slash)
 	//RawPath    string    // encoded path hint (see EscapedPath method)
 	//ForceQuery bool      // append a query ('?') even if RawQuery is empty
@@ -53,15 +80,19 @@ func (u *URL)HasValidUserAndPassword() bool  {
 }
 
 func (u *URL)GetHostPort(def int) (string, int) {
-	hp := strings.SplitN(u.Host, ":", 2)
-	if len(hp) < 2{
-		return hp[0], def
+	if u.Host.Port < 1{
+		return u.Host.Addr, def
 	}
-	port, err := strconv.Atoi(hp[1])
-	if err != nil{
-		return hp[0], def
-	}
-	return hp[0], port
+	return u.Host.Addr, u.Host.Port
+	//hp := strings.SplitN(u.Host, ":", 2)
+	//if len(hp) < 2{
+	//	return hp[0], def
+	//}
+	//port, err := strconv.Atoi(hp[1])
+	//if err != nil{
+	//	return hp[0], def
+	//}
+	//return hp[0], port
 }
 
 type UserInfo struct {
@@ -79,8 +110,12 @@ func (u *UserInfo)String() string {
 
 func (u *URL)FullPath() string {
 	var buf strings.Builder
-	if u.Host != ""{
-		buf.WriteString(u.Host)
+	if u.Host.Addr != ""{
+		buf.WriteString(u.Host.Addr)
+	}
+	if u.Host.Port > 0{
+		buf.WriteByte(':')
+		buf.WriteString(strconv.FormatInt(int64(u.Host.Port), 10))
 	}
 	buf.WriteByte('/')
 	if u.Path != ""{
@@ -103,11 +138,16 @@ func (u *URL) String() string {
 		}
 	}
 
-	if u.Host != ""{
-		buf.WriteString(u.Host)
+	if u.Host.Addr != ""{
+		buf.WriteString(u.Host.Addr)
 	}
-	buf.WriteByte('/')
+	if u.Host.Port > 0{
+		buf.WriteByte(':')
+		buf.WriteString(strconv.FormatInt(int64(u.Host.Port), 10))
+	}
+
 	if u.Path != ""{
+		buf.WriteByte('/')
 		buf.WriteString(u.Path)
 	}
 
@@ -164,14 +204,14 @@ func UrlParse(raw string) *URL {
 	//host
 	{
 		vs:=strings.SplitN(raw, "/", 2)
-		u.Host = vs[0]
+		u.Host = HostFromString(vs[0])
 		if len(vs) == 2{
 			flags |= FlagHost
 			raw = vs[1]
 		}else{
-			if flags < 1{
-				return nil
-			}
+			//if flags < 1{
+			//	return nil
+			//}
 			//no more info
 			return &u
 		}
@@ -233,9 +273,14 @@ func (u *URL) WithPath(path string) string {
 		}
 	}
 
-	if u.Host != ""{
-		buf.WriteString(u.Host)
+	if u.Host.Addr != ""{
+		buf.WriteString(u.Host.Addr)
 	}
+	if u.Host.Port > 0{
+		buf.WriteByte(':')
+		buf.WriteString(strconv.FormatInt(int64(u.Host.Port), 10))
+	}
+
 	if path != ""{
 		if path[0] != '/'{
 			buf.WriteByte('/')
