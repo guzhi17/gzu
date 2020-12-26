@@ -124,6 +124,39 @@ func (u *URL)FullPath() string {
 	return buf.String()
 }
 
+func (u *URL)FullPathName() string {
+	var buf strings.Builder
+	if u.Host.Addr != ""{
+		buf.WriteString(u.Host.Addr)
+	}
+	if u.Host.Port > 0{
+		buf.WriteByte(':')
+		buf.WriteString(strconv.FormatInt(int64(u.Host.Port), 10))
+	}
+	if u.Path != ""{
+		buf.WriteByte('/')
+		buf.WriteString(u.Path)
+	}
+	return buf.String()
+}
+
+func (u *URL)Clone()(r *URL){
+	r = &URL{
+		Scheme:   u.Scheme,
+		Host:     u.Host,
+		Path:     u.Path,
+		RawQuery: u.RawQuery,
+		Fragment: u.Fragment,
+	}
+	if u.User != nil{
+		r.User = &UserInfo{
+			Username: u.User.Username,
+			Password: u.User.Password,
+		}
+	}
+	return
+}
+
 func (u *URL) String() string {
 	var buf strings.Builder
 	if u.Scheme != "" {
