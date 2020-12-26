@@ -14,7 +14,7 @@ import (
 
 // "2019.12.1" -> 568298029518422017
 const(
-	Ver20191201 = 568298029518422017
+	Ver20191201 Version = 568298029518422017
 )
 
 type ErrorVersion struct {
@@ -28,11 +28,28 @@ func (e ErrorVersion)Error() string {
 	return b.String()
 }
 
+
+type Version uint64
+
+func (v Version) Major() uint64  {
+	return (uint64(v) >> 48)&0xffff //, (v >> 32)&0xffff, v &0xffffffff)
+}
+func (v Version) Minor() uint64  {
+	return (uint64(v) >> 32)&0xffff //, v &0xffffffff)
+}
+func (v Version) Build() uint64  {
+	return uint64(v) &0xffffffff //, v &0xffffffff)
+}
+
 //0-32767, 0-65535, 0-2147483647
-func VerToInt64(ver string)(int64, error){
+func VerToInt64(ver string)(Version, error){
 	vers := strings.Split(ver, ".")
 	if len(vers) != 3{
-		return 0, ErrorVersion{Val: ver}
+		vv, err := strconv.ParseUint(ver, 0, 0)
+		if err != nil{
+			return 0, err
+		}
+		return Version(vv), nil
 	}
 
 	//v0
@@ -52,10 +69,9 @@ func VerToInt64(ver string)(int64, error){
 	if v1 < 0 || v1 > 65535{
 		return 0, ErrorVersion{Val: ver}
 	}
-
-
+	
 	//v2
-	v2, err := strconv.ParseInt(vers[2], 10, 0)
+	v2, err := strconv.ParseUint(vers[2], 10, 0)
 	if err != nil {
 		return 0, err
 	}
@@ -63,14 +79,14 @@ func VerToInt64(ver string)(int64, error){
 		return 0, ErrorVersion{Val: ver}
 	}
 
-	return int64(v0) << 48 | int64(v1) << 32 | v2, nil
+	return Version(uint64(v0) << 48 | uint64(v1) << 32 | v2), nil
 }
 
-func VerFromInt64(v int64) string {
+func VerFromInt64(v Version) string {
 	return fmt.Sprintf("%d.%d.%d", (v >> 48)&0xffff, (v >> 32)&0xffff, v &0xffffffff)
 }
 
-func VerIsBiggerThan(ver string, v int64) (bool, error) {
+func VerIsBiggerThan(ver string, v Version) (bool, error) {
 	vc, err := VerToInt64(ver)
 	if err != nil{
 		return false, err
