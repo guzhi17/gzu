@@ -58,3 +58,11 @@ func TestStringContentNormal(t *testing.T) {
 func TestStringTailAny(t *testing.T) {
 	log.Println(StringTailAny("hello_this.big_test_", "._"))
 }
+
+func TestRuneCountRepeat(t *testing.T) {
+	log.Println(RuneCountRepeat([]rune("D你好你好"), 2,2))
+}
+
+func TestRuneChineseOnly(t *testing.T) {
+	log.Println(string(RuneChineseOnly([]rune(`🌹🍀🍎💰📱🌙🍁🍂🍃🌷💎🔪🔫🏀歷史文化學院통합검색과디렉터리你 好 ，的world就是不知道第三方库垃圾吧爱科技规范日本语/にほんご Nihongo`))))
+}

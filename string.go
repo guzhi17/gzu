@@ -347,3 +347,52 @@ func RuneIndex(s []rune, v rune) int {
 	return -1
 }
 ///======================================================================================================================
+///======================================================================================================================
+//word, min-word-len, min-count
+func RuneCountRepeat(s []rune, wn, mn int) (has bool, start, cnt int, w []rune) {
+	l := len(s)
+	if wn < 1{ wn = 1 }
+	if mn < 2{ mn = 2}
+	for wz := l/mn; wz >= wn; wz--{
+		for i:=0; i <= l-mn*wz; i++{
+			w0 := s[i:i+wz]
+			j := 1
+			for ; i+(j+1)*wz <= l; j++{
+				if !RuneCompare(w0, s[i+j*wz:i+(j+1)*wz]){
+					break
+				}
+			}
+			if j >= mn{
+				return true, i, j, w0
+			}
+		}
+	}
+	return
+}
+
+//split to tow set with same order
+//除了u4e00-u9fa5 (中文)之外，还有(0x3400, 0x4DB5)也是
+func RuneChineseOnly(s []rune) ( r []rune)  {
+	r, _ = RuneSplit(s, func(v rune) bool {
+		return (v >= 0x4e00 && v<= 0x9fa5) || (v >= 0x3400 && v <= 0x4DB5)
+	})
+	return r
+}
+func RuneSplit(s []rune, f func(rune)bool) (a, b []rune) {
+	for i:=0; i<len(s); i++{
+		if f(s[i]){
+			a = append(a, s[i])
+		}else{
+			b = append(b, s[i])
+		}
+	}
+	return
+}
+
+func RuneCompare(a, b []rune) bool {
+	if len(a) != len(b){return false}
+	for i:=0; i < len(a); i++{
+		if a[i] != b[i]{return false}
+	}
+	return true
+}
