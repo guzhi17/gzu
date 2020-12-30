@@ -305,3 +305,12 @@ func (d *Duration) CAS(old, new time.Duration) bool {
 // Value shadows the type of the same name from sync/atomic
 // https://godoc.org/sync/atomic#Value
 type Value struct{ atomic.Value }
+
+
+
+func SequenceGenerator(init uint64) func() uint64 {
+	var g = Uint64(init)
+	return func() uint64 {
+		return g.Inc()
+	}
+}
