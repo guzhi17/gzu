@@ -17,12 +17,14 @@ import (
 
 func TestVerToInt64(t *testing.T) {
 	log.SetFlags(11)
-	log.Println(VerToInt64("0x01"))
-	log.Println(VerToInt64("1.3.2"))
+	log.Println(VerToInt64("v0x01"))
+	log.Println(VerToInt64("v1.3.2"))
 	log.Println(VerFromInt64(281487861612546))
 
 
 	log.Println(VerToInt64("2019.12.1"))
+	x, _ := VerToInt64("2019.12.1.1212")
+	log.Println(x, x.String4())
 	log.Println(VerFromInt64(Ver20191201), Ver20191201.Major(), Ver20191201.Minor(), Ver20191201.Build())
 	log.Println(VerFromInt64(568297982273782972))
 }
