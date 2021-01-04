@@ -334,3 +334,10 @@ func ParseDuration(s string) (time.Duration, error) {
 	}
 	return time.Duration(d), nil
 }
+
+
+
+const WeekSeconds = 7*24*60*60
+func TimeWeeks(t time.Time) int64 {
+	return t.Unix() / WeekSeconds
+}
