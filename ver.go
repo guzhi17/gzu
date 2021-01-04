@@ -96,6 +96,9 @@ func VerToInt64(ver string)(Version, error){
 
 
 func verToInt64(vers []string)(Version, error){
+	if len(vers) < 3{
+		return 0, ErrorVersion{}
+	}
 	//v0
 	v0, err := strconv.Atoi(vers[0])
 	if err != nil {
