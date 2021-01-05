@@ -18,9 +18,10 @@ const(
 	FlagScheme = 1
 	FlagUser = 2
 	FlagHost = 4
-	FlagPath = 8
-	FlagRawQuery = 0x10
-	FlagFragment = 0x20
+	FlagPort = 8
+	FlagPath = 0x10
+	FlagRawQuery = 0x20
+	FlagFragment = 0x40
 )
 
 // [scheme:][//[userinfo@]host][/]path[?query][#fragment]
@@ -246,6 +247,7 @@ func (u *URL) String() string {
 	return buf.String()
 }
 
+
 // [scheme:][//[userinfo@]host][/]path[?query][#fragment]
 
 func UrlParse(raw string) *URL {
@@ -400,4 +402,94 @@ func (u *URL) WithPath(path string) string {
 	//}
 
 	return buf.String()
+}
+
+
+
+
+
+type UrlInfoBuilder struct {
+	Url *URL
+	builder strings.Builder
+	flags int64
+}
+
+func (b *UrlInfoBuilder)Scheme() *UrlInfoBuilder {
+	if b.flags < FlagScheme {
+		if b.Url.Scheme != "" {
+			b.builder.WriteString(b.Url.Scheme)
+			b.builder.WriteString("://")
+		}
+		b.flags = FlagScheme
+	}
+	return b
+}
+
+func (b *UrlInfoBuilder)User() *UrlInfoBuilder {
+	if b.flags < FlagUser {
+		if b.Url.User != nil{
+			var us = b.Url.User.String()
+			if us != ""{
+				b.builder.WriteString(us)
+				b.builder.WriteByte('@')
+			}
+		}
+		b.flags = FlagUser
+	}
+	return b
+}
+func (b *UrlInfoBuilder)Addr() *UrlInfoBuilder {
+	if b.flags < FlagHost {
+		if b.Url.Host.Addr != ""{
+			b.builder.WriteString(b.Url.Host.Addr)
+		}
+		b.flags = FlagHost
+	}
+	return b
+}
+func (b *UrlInfoBuilder)Port() *UrlInfoBuilder {
+	if b.flags < FlagPort {
+		if b.Url.Host.Port > 0{
+			b.builder.WriteByte(':')
+			b.builder.WriteString(strconv.FormatInt(int64(b.Url.Host.Port), 10))
+		}
+		b.flags = FlagPort
+	}
+	return b
+}
+func (b *UrlInfoBuilder)Path() *UrlInfoBuilder {
+	if b.flags < FlagPath {
+		if b.Url.Path != ""{
+			if b.Url.Path[0] != '/'{
+				b.builder.WriteByte('/')
+			}
+			b.builder.WriteString(b.Url.Path)
+		}
+		b.flags = FlagPath
+	}
+	return b
+}
+func (b *UrlInfoBuilder)RawQuery() *UrlInfoBuilder {
+	if b.flags < FlagRawQuery {
+		if b.Url.RawQuery != ""{
+			b.builder.WriteByte('?')
+			b.builder.WriteString(b.Url.RawQuery)
+		}
+		b.flags = FlagRawQuery
+	}
+	return b
+}
+func (b *UrlInfoBuilder)Fragment() *UrlInfoBuilder {
+	if b.flags < FlagFragment {
+		if b.Url.Fragment != ""{
+			b.builder.WriteByte('#')
+			b.builder.WriteString(b.Url.Fragment)
+		}
+		b.flags = FlagFragment
+	}
+	return b
+}
+
+func (b *UrlInfoBuilder)ToString()string{
+	return b.builder.String()
 }

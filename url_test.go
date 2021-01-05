@@ -76,3 +76,9 @@ func TestUrlTo(t *testing.T) {
 	t.Log(u, err, u.FullPath())
 	t.Log(u)
 }
+
+func TestUrlInfoBuilder_Addr(t *testing.T) {
+	log.SetFlags(11)
+	s := &UrlInfoBuilder{Url: UrlParse(`https://me:pass@example.com/foo/bar?x=q&a=8&=b&c=&x=1&y=2#anchor`)}
+	log.Println(s.Scheme().User().Addr().Port().Path().RawQuery().Fragment().ToString())
+}
