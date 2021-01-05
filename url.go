@@ -160,9 +160,13 @@ func (u *URL)FullPath() string {
 		buf.WriteByte(':')
 		buf.WriteString(strconv.FormatInt(int64(u.Host.Port), 10))
 	}
-	buf.WriteByte('/')
 	if u.Path != ""{
+		if u.Path[0] != '/'{
+			buf.WriteByte('/')
+		}
 		buf.WriteString(u.Path)
+	}else{
+		buf.WriteByte('/')
 	}
 	return buf.String()
 }
@@ -223,7 +227,9 @@ func (u *URL) String() string {
 	}
 
 	if u.Path != ""{
-		buf.WriteByte('/')
+		if u.Path[0] != '/'{
+			buf.WriteByte('/')
+		}
 		buf.WriteString(u.Path)
 	}
 
@@ -278,38 +284,55 @@ func UrlParse(raw string) *URL {
 		}
 	}
 	//host
+	var defaultPath = ""
 	{
 		vs:=strings.SplitN(raw, "/", 2)
-		u.Host = HostFromString(vs[0])
 		if len(vs) == 2{
+			defaultPath = "/"
+			u.Host = HostFromString(vs[0])
 			flags |= FlagHost
 			raw = vs[1]
-		}else{
-			//if flags < 1{
-			//	return nil
-			//}
-			//no more info
-			return &u
 		}
+		//else{
+		//	//no host here, we make it before ?#
+		//	return &u
+		//}
 	}
 	//path
 	{
 		vs:=strings.SplitN(raw, "?", 2)
 		if len(vs) == 2{
-			flags |= FlagPath
-			u.Path = vs[0]
+			if flags & FlagHost == 0{
+				u.Host = HostFromString(vs[0])
+				flags |= FlagHost
+
+				flags |= FlagPath
+				u.Path = defaultPath
+			}else{
+				flags |= FlagPath
+				u.Path = defaultPath + vs[0]
+			}
 			raw = vs[1]
 		}
 	}
 	//query and fragment
 	{
 		vs:=strings.SplitN(raw, "#", 2)
-		if flags & FlagPath > 0{
-			flags |= FlagRawQuery
-			u.RawQuery = vs[0]
-		}else{
+		if flags & FlagHost == 0{
+			u.Host = HostFromString(vs[0])
+			flags |= FlagHost
 			flags |= FlagPath
-			u.Path = vs[0]
+			u.Path = defaultPath
+			flags |= FlagRawQuery
+			u.RawQuery = ""
+		}else{
+			if flags & FlagPath > 0{
+				flags |= FlagRawQuery
+				u.RawQuery = vs[0]
+			}else{
+				flags |= FlagPath
+				u.Path = defaultPath + vs[0]
+			}
 		}
 		if len(vs) == 2{
 			flags |= FlagFragment
