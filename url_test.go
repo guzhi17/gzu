@@ -57,8 +57,8 @@ func TestURL_GetQuery(t *testing.T) {
 	log.Println(u.GetQuery("d"))
 
 	var xt XT
-	u.UnmarshalQuery(&xt)
-	log.Println(xt)
+	err := u.UnmarshalQuery(&xt)
+	log.Println(err, xt)
 }
 
 func TestUrlTo(t *testing.T) {
