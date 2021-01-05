@@ -63,6 +63,7 @@ type URL struct {
 	Fragment   string    // fragment for references, without '#'
 }
 func (u *URL)ParseQuery() map[string]string  {
+	//todo cache it?, you'd make it private first
 	kvs:=strings.Split(u.RawQuery, "&")
 	var m = map[string]string{}
 	for _, kvi := range kvs{
@@ -75,6 +76,48 @@ func (u *URL)ParseQuery() map[string]string  {
 	}
 	return m
 }
+
+func (u *URL)UnmarshalQuery(o interface{}) error {
+	return MapMapByTag(o, u.ParseQuery(), "json")
+}
+
+func (u *URL)GetQuery(k string) (has bool, v string)  {
+	rq := u.RawQuery
+	var (
+		ib = -1
+		ie = -1
+	)
+	i:=0
+	for ;i<len(rq);i++{
+		switch rq[i] {
+		case '=': ie = i
+		case '&':
+			var ip = i
+			if ie > ib{
+				ip = ie
+			}
+			if strings.EqualFold(k, rq[ib+1:ip]){
+				if ip < i{
+					return true, rq[ip+1:i]
+				}
+				return true, ""
+			}
+			ib = i
+		}
+	}
+	var ip = i
+	if ie > ib{
+		ip = ie
+	}
+	if strings.EqualFold(k, rq[ib+1:ip]){
+		if ip < i{
+			return true, rq[ip+1:i]
+		}
+		return true, ""
+	}
+	return false, ""
+}
+
 func (u *URL)HasValidUserAndPassword() bool  {
 	return u.User!=nil && len(u.User.Username)>0 && len(u.User.Password)>0
 }

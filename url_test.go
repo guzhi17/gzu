@@ -1,6 +1,7 @@
 package gzu
 
 import (
+	"log"
 	"testing"
 )
 
@@ -36,6 +37,28 @@ func TestUrl(t *testing.T)  {
 	//
 	u = UrlParse(`https://me:pass@example.com/foo/bar?x=1&y=2#anchor`)
 	t.Log(u, err, u.FullPath())
+}
+
+
+
+type XT struct {
+	X string `json:"x"`
+	A int `json:"a"`
+}
+
+func TestURL_GetQuery(t *testing.T) {
+	u := UrlParse(`https://me:pass@example.com/foo/bar?x=q&a=8&=b&c=&x=1&y=2#anchor`)
+	t.Log(u)
+	log.Println(u.GetQuery("x"))
+	log.Println(u.GetQuery("y"))
+	log.Println(u.GetQuery("a"))
+	log.Println(u.GetQuery("b"))
+	log.Println(u.GetQuery("c"))
+	log.Println(u.GetQuery("d"))
+
+	var xt XT
+	u.UnmarshalQuery(&xt)
+	log.Println(xt)
 }
 
 func TestUrlTo(t *testing.T) {

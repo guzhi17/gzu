@@ -96,7 +96,7 @@ func VerToInt64(ver string)(Version, error){
 
 
 func verToInt64(vers []string)(Version, error){
-	if len(vers) < 3{
+	if len(vers) < 3 || len(vers) > 4{
 		return 0, ErrorVersion{}
 	}
 	//v0
@@ -135,12 +135,14 @@ func verToInt64(vers []string)(Version, error){
 		if v3 < 0 || v3 > 65535{
 			return 0, ErrorVersion{}
 		}
-		v2, err = strconv.ParseUint(vers[3], 10, 0)
-		if err != nil {
-			return 0, err
-		}
-		if v2 < 0 || v2 > 65535{
-			return 0, ErrorVersion{}
+		if len(vers[3]) > 0{
+			v2, err = strconv.ParseUint(vers[3], 10, 0)
+			if err != nil {
+				return 0, err
+			}
+			if v2 < 0 || v2 > 65535{
+				return 0, ErrorVersion{}
+			}
 		}
 	}
 	return Version(uint64(v0) << 48 | uint64(v1) << 32 | v2 | (v3 << 16)), nil
