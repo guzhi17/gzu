@@ -73,6 +73,12 @@ func (z TimeZone)DateZeroMs(now time.Time, ddays int) ( msday int64) {
 	return
 }
 
+func (z TimeZone)DateZeroS(now time.Time, ddays int) ( sday int64) {
+	y, m, d := now.Date()
+	sday = time.Date(y, m, d+ddays, 0,0,0,0, z.Location).Unix()
+	return
+}
+
 
 func (z TimeZone)YearZeroMs(now time.Time) ( msday int64) {
 	y, _, _ := now.Date()
