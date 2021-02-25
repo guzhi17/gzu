@@ -7,6 +7,8 @@
 package gzu
 
 import (
+	"log"
+	"math"
 	"testing"
 )
 
@@ -30,4 +32,29 @@ func TestDistanceM(t *testing.T) {
 		Latitude:             30.634942,
 		Longitude:            104.146622,
 	}))
+}
+
+func TestR3OfLocation(t *testing.T) {
+
+	//
+	var ls = []Location{
+		{0, 0}, //1,0,0
+		{0, -90}, //0, -1, 0
+		{0, 90}, //0, 1, 0
+		{0, 180}, //-1, 0, 0
+		{-90, 0}, //
+		{-90, -90},
+		{-90, 90},
+		{-90, 180},
+		{90, 0},
+		{90, -90},
+		{90, 90},
+		{90, 180},
+	}
+
+	fract := math.Pi/180
+	log.Println(fract)
+	for _, li := range ls{
+		log.Println(R3OfLocation(li.Latitude, li.Longitude))
+	}
 }

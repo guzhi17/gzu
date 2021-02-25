@@ -265,12 +265,12 @@ func FloatEqual(a, b, e float64) bool {
 
 const(
 	EarthDiameterM 	= 12756274
-	RadFactor 		= 0.0174532925
+	RadFactor 		= 0.017453292519943295 // math.Pi/180, 0.0174532925
 )
 
 type Location struct {
-	Latitude             float64
-	Longitude            float64
+	Latitude             float64 // (-90,90]
+	Longitude            float64 // (-180,180]
 }
 
 func DistanceRadian(a Location, b Location) float64  {
@@ -281,6 +281,23 @@ func DistanceRadian(a Location, b Location) float64  {
 
 func DistanceM(a Location, b Location) float64 {
 	return EarthDiameterM*DistanceRadian(a, b)
+}
+
+
+const(
+	AxisX = iota
+	AxisY
+	AxisZ
+	AxisEnd
+)
+type Point3 [AxisEnd]float64
+func R3OfLocation(latitude, longitude float64) (pt Point3) {
+	latitude, longitude = latitude*RadFactor, longitude*RadFactor
+	pt[AxisZ] = math.Sin(latitude)
+	r := math.Cos(latitude)
+	pt[AxisY] = r*math.Sin(longitude)
+	pt[AxisX] = r*math.Cos(longitude)
+	return
 }
 
 //
