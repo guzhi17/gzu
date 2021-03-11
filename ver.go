@@ -149,11 +149,11 @@ func verToInt64(vers []string)(Version, error){
 }
 
 func (v Version) String() string {
-	return fmt.Sprintf("v%d.%d.%d", (v >> 48)&0xffff, (v >> 32)&0xffff, v &0xffffffff)
+	return fmt.Sprintf("%d.%d.%d", (v >> 48)&0xffff, (v >> 32)&0xffff, v &0xffffffff)
 }
 
 func (v Version) String4() string {
-	return fmt.Sprintf("v%d.%d.%d.%d", (v >> 48)&0xffff, (v >> 32)&0xffff, (v >> 16)&0xffff, v&0xffff)
+	return fmt.Sprintf("%d.%d.%d.%d", (v >> 48)&0xffff, (v >> 32)&0xffff, (v >> 16)&0xffff, v&0xffff)
 }
 
 func VerFromInt64(v Version) string {
