@@ -10,9 +10,11 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
 
@@ -395,4 +397,29 @@ func RuneCompare(a, b []rune) bool {
 		if a[i] != b[i]{return false}
 	}
 	return true
+}
+
+
+
+func String2Bytes(s string) []byte {
+	stringHeader := (*reflect.StringHeader)(unsafe.Pointer(&s))
+
+	bh := reflect.SliceHeader{
+		Data: stringHeader.Data,
+		Len:  stringHeader.Len,
+		Cap:  stringHeader.Len,
+	}
+
+	return *(*[]byte)(unsafe.Pointer(&bh))
+}
+
+func Bytes2String(b []byte) string{
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+
+	sh := reflect.StringHeader{
+		Data: sliceHeader.Data,
+		Len:  sliceHeader.Len,
+	}
+
+	return *(*string)(unsafe.Pointer(&sh))
 }
